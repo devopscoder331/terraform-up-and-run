@@ -2,6 +2,17 @@ provider "aws" {
   region = "eu-central-1"
 }
 
+terraform {
+  backend "s3" {
+    bucket = "terrafom-run-and-running-state-devopscoder331"
+    key = "global/terraform.tfstate"
+    region = "eu-central-1"
+
+    dynamodb_table = "terraform-up-and-running-lock"
+    encrypt = true
+  }
+}
+
 resource "aws_launch_configuration" "example" {
   image_id = "ami-0d359437d1756caa8"
   instance_type = "t2.micro"
