@@ -13,10 +13,10 @@ terraform {
   }
 }
 
-data "terrafom_remote_state" "db" {
+data "terraform_remote_state" "db" {
   backend = "s3"
 
-  config {
+  config = {
     bucket = "terrafom-run-and-running-state-devopscoder331"
     key = "stage/data-stores/mysql/terraform.tfstate"
     region = "eu-central-1"
@@ -32,6 +32,8 @@ resource "aws_launch_configuration" "example" {
   user_data = <<-EOF
               #!/bin/bash
               echo "Hello, world" > index.html
+              echo "${data.terraform_remote_state.db.outputs.address}" >> index.html
+              echo "${data.terraform_remote_state.db.outputs.port}" >> index.html
               hostname | tee -a index.html
               nohup busybox httpd -f -p ${var.server_port} &
               EOF
