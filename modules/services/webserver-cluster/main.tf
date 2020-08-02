@@ -13,14 +13,16 @@ data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    bucket = "terrafom-run-and-running-state-devopscoder331"
-    key = "stage/data-stores/mysql/terraform.tfstate"
+    #bucket = "terrafom-run-and-running-state-devopscoder331"
+    #key = "stage/data-stores/mysql/terraform.tfstate"
+    bucket = var.db_remote_state_bucket
+    key = var.db_remote_state_key
     region = "eu-central-1"
   }
 }
 
 data "template_file" "user_data" {
-  template = file("user_data.sh")
+  template = file("../../../modules/services/webserver-cluster/user_data.sh")
 
   vars = {
     server_port = var.server_port
@@ -59,7 +61,7 @@ resource "aws_autoscaling_group" "example" {
 }
 
 resource "aws_security_group" "instance2" {
-    name = "terrafom-example-group2"
+    name = "${var.cluster_name}-instance"
 
     ingress {
       from_port = var.server_port
@@ -70,7 +72,7 @@ resource "aws_security_group" "instance2" {
 }
 
 resource "aws_security_group" "alb" {
-    name = "terraform-example-alb"
+    name = "${var.cluster_name}-alb"
 
     # allow all input http request
     ingress {

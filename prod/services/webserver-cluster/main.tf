@@ -3,5 +3,5 @@ provider "aws" {
 }
 
 module "webserver-cluster" {
-  source = "../../../modules/services/webserver-cluster/"
+  source = "../../../modules/services/webserver-cluster"
 }

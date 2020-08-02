@@ -4,4 +4,8 @@ provider "aws" {
 
 module "webserver-cluster" {
   source = "../../../modules/services/webserver-cluster"
+
+  cluster_name = "webserver-stage"
+  db_remote_state_bucket = "terrafom-run-and-running-state-devopscoder331"
+  db_remote_state_key = "stage/data-stores/mysql/terraform.tfstate"
 }
