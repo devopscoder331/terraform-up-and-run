@@ -9,12 +9,18 @@ terraform {
   }
 }
 
+locals {
+  http_port = 80
+  any_port = 0
+  any_protocol = "-1"
+  tcp_protocol = "tcp"
+  all_ips = ["0.0.0.0/0"]
+}
+
 data "terraform_remote_state" "db" {
   backend = "s3"
 
   config = {
-    #bucket = "terrafom-run-and-running-state-devopscoder331"
-    #key = "stage/data-stores/mysql/terraform.tfstate"
     bucket = var.db_remote_state_bucket
     key = var.db_remote_state_key
     region = "eu-central-1"
@@ -33,7 +39,7 @@ data "template_file" "user_data" {
 
 resource "aws_launch_configuration" "example" {
   image_id = "ami-0d359437d1756caa8"
-  instance_type = "t2.micro"
+  instance_type = var.instance_type
   security_groups = [aws_security_group.instance2.id]
 
   user_data = data.template_file.user_data.rendered
@@ -50,12 +56,12 @@ resource "aws_autoscaling_group" "example" {
   target_group_arns = [aws_lb_target_group.asg.arn]
   health_check_type = "ELB"
 
-  min_size = 2
-  max_size = 10
+  min_size = var.min_size
+  max_size = var.max_size
 
   tag {
     key = "name"
-    value = "terraform-asg-example"
+    value = var.cluster_name
     propagate_at_launch = true
   }
 }
@@ -76,18 +82,18 @@ resource "aws_security_group" "alb" {
 
     # allow all input http request
     ingress {
-      from_port = 80
-      to_port = 80
-      protocol = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      from_port = local.http_port
+      to_port = local.http_port
+      protocol = local.tcp_protocol
+      cidr_blocks = local.all_ips
     }
 
     # allow all output request
     egress {
-      from_port = 0
-      to_port = 0
-      protocol = "-1"
-      cidr_blocks = ["0.0.0.0/0"]
+      from_port = local.any_port
+      to_port = local.any_port
+      protocol = local.any_protocol
+      cidr_blocks = local.all_ips
     }
 }
 
@@ -108,7 +114,7 @@ resource "aws_lb" "example" {
 
 resource "aws_lb_listener" "http" {
     load_balancer_arn = aws_lb.example.arn
-    port = 80
+    port = local.http_port
     protocol = "HTTP"
 
     # default response simple list with code 404

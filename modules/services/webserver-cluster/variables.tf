@@ -5,16 +5,31 @@ variable "server_port" {
 }
 
 variable "cluster_name" {
-  default = ""
+  description = ""
   type = string
 }
 
 variable "db_remote_state_bucket" {
-  default = ""
+  description = ""
   type = string
 }
 
 variable "db_remote_state_key" {
-  default = ""
+  description = ""
   type = string
+}
+
+variable "instance_type" {
+  description = "The type of EC2 Instance to run (e.g. t2.micro)"
+  type = string
+}
+
+variable "min_size" {
+  description = "The minimum number of EC2 Instance in the ASG"
+  type = number
+}
+
+variable "max_size" {
+  description = "The maximum number of EC2 Instance in the ASG"
+  type = number
 }
